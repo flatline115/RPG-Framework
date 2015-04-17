@@ -41,9 +41,9 @@ local module = {}
 				-- Swimming
 					character.Humanoid.Swimming:connect(function()
 						-- Assumes roblox water because, yeah.
-						local oldTime = math.floor(tick());
+						local oldTime = tick();
 						while character.Humanoid.Swimming.connected do wait() end;
-						local currentTime = math.floor(tick());
+						local currentTime = tick();
 						local difference = currentTime - oldTime;
 						local addExp = difference * SwimmingExpGain;
 						remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value) + addExp}});
@@ -52,19 +52,36 @@ local module = {}
 				-- Walking
 					character.Humanoid.Running:connect(function(speed)
 						if not(shiftKey) then
-							local oldTime = math.floor(tick());
+							local oldTime = tick();
 							while speed > 0 do print(speed) wait() end;
-							local currentTime = math.floor(tick());
+							local currentTime = tick();
 							local difference = currentTime - oldTime;
 							local addExp = difference * WalkingExpGain;
+							print(addExp);
 							remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value) + addExp}});
 						else						
 						end;
 					end);
+				-- Level up effects.
+					local effects = function(walkspeed)
+						character.WalkSpeed = character.WalkSpeed + walkspeed;
+					end;
 				
+				-- Leveling up
+				CurrentExp.Changed:connect(function()
+					if tonumber(CurrentExp.Value) >= tonumber(ExpNeeded.Value) then
+						effects(2);			
+					end;
+				end);
+				-- Loading
+				local Loaded = function(Level)
+					effects(2 * Level);
+				end;
+				Loaded(tonumber(CurrentLevel.Value))
 			end;
 		};
 		functions[skill](player, character);
 	end;
 	
 return module
+	

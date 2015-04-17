@@ -1,7 +1,7 @@
 -- ServerScriptService
 local master = Instance.new("RemoteEvent", game.ReplicatedStorage);
 master.Name = "Master";
-master.OnServerEvent:connect(function(requests, data) 
+master.OnServerEvent:connect(function(player, requests, data) 
 	local functions = {
 		change = function(data2)
 			local instance = data2[1];
