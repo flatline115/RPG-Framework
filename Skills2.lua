@@ -1,4 +1,3 @@
--- ReplicatedStorage
 local module = {}
 	function module:GetSkills()	
 		local validSkills = {"Athletics", "Acrobatics"};
@@ -39,10 +38,10 @@ local module = {}
 						end;
 					end);
 				-- Swimming
-					character.Humanoid.Swimming:connect(function()
+					character.Humanoid.Swimming:connect(function(speed)
 						-- Assumes roblox water because, yeah.
 						local oldTime = tick();
-						while character.Humanoid.Swimming.connected do wait() end;
+						while (character.Humanoid:GetState() == Enum.HumanoidStateType.Swimming) do wait() end; 
 						local currentTime = tick();
 						local difference = currentTime - oldTime;
 						local addExp = difference * SwimmingExpGain;
@@ -53,18 +52,17 @@ local module = {}
 					character.Humanoid.Running:connect(function(speed)
 						if not(shiftKey) then
 							local oldTime = tick();
-							while speed > 0 do print(speed) wait() end;
+							while (speed > 0) do wait() end;
 							local currentTime = tick();
 							local difference = currentTime - oldTime;
 							local addExp = difference * WalkingExpGain;
-							print(addExp);
 							remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value) + addExp}});
 						else						
 						end;
 					end);
 				-- Level up effects.
 					local effects = function(walkspeed)
-						character.WalkSpeed = character.WalkSpeed + walkspeed;
+						character.Humanoid.WalkSpeed = character.Humanoid.WalkSpeed + walkspeed;
 					end;
 				
 				-- Leveling up
@@ -79,9 +77,24 @@ local module = {}
 				end;
 				Loaded(tonumber(CurrentLevel.Value))
 			end;
+			
+			Acrobatics = function(player, character)
+				local remote = game.ReplicatedStorage.Master;				
+				local folder = player.Levels;
+				local skill = folder.Acrobatics;
+				local CurrentExp = skill.Experience;
+				local humanoid = character.Humanoid;
+				
+				humanoid.Changed:connect(function(property)
+					print(property);
+					if (property == "Jump") then
+						remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value) + 1}});
+					end;
+				end);
+			end;
 		};
 		functions[skill](player, character);
 	end;
 	
 return module
-	
+	 
