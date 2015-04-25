@@ -1,9 +1,9 @@
 local module = {}
 	function module:GetSkills()	
-		local validSkills = {"Athletics", "Acrobatics"};
-		local defaultLevel = {1, 1,};
-		local defaultExp = {0, 0};
-		local defaultExpNeeded = {100, 100};
+		local validSkills = {"Athletics", "Acrobatics", "Swordfighting"};
+		local defaultLevel = {1, 1, 1};
+		local defaultExp = {0, 0, 0};
+		local defaultExpNeeded = {100, 100, 50};
 		--[[
 			Skills Description:
 				Athletics is walking, running and swimming.
@@ -91,6 +91,43 @@ local module = {}
 						remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value) + 1}});
 					end;
 				end);
+			end;
+			
+			SwordFighting = function(player, character)
+				local remote = game.ReplicatedStorage.Master;
+				local folder = script.Weapons.SwordNames;
+				local folder2 = player.Levels.Swordfighting;
+				local CurrentExp = folder2.Experience;
+				local Debounce = false;
+				local addExp = 1.5;
+				-- Assumes roblox default sword; can be applied to any sword tho with minor editing to use damage values.
+				local weapons = player.Backpack;
+				for _, obj in next, weapons:GetChildren() do
+					for _, Valid in next, folder:GetChildren() do
+						if (Valid.Name == obj.Name) then
+							print("Yay");
+							local mouse = player:GetMouse();
+							local detect = obj.Handle;
+							local debounce = false;
+							mouse.Button1Down:connect(function()
+								print("connected");
+								debounce = false;
+								if (obj.Parent == character) then
+									detect.Touched:connect(function(part)
+										if not(debounce) then
+											if (part.Parent:FindFirstChild("Humanoid")) then
+												debounce = true;
+													print(part);												
+													remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value + addExp)}});
+											end;
+										end;
+									end);
+								end;							
+							end);
+						end;
+					end;
+				end;
+						
 			end;
 		};
 		functions[skill](player, character);
