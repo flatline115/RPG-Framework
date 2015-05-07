@@ -1,9 +1,9 @@
 local module = {}
 	function module:GetSkills()	
-		local validSkills = {"Athletics", "Acrobatics", "Swordfighting", "LightArmor"};
-		local defaultLevel = {1, 1, 1, 1};
-		local defaultExp = {0, 0, 0, 0};
-		local defaultExpNeeded = {100, 100, 50, 100};
+		local validSkills = {"Athletics", "Acrobatics", "Swordfighting", "LightArmor", "HeavyArmor"};
+		local defaultLevel = {1, 1, 1, 1, 1};
+		local defaultExp = {0, 0, 0, 0, 0};
+		local defaultExpNeeded = {100, 100, 50, 100, 150};
 		--[[
 			Skills Description:
 				Athletics is walking, running and swimming.
@@ -153,7 +153,33 @@ local module = {}
 						end;
 					end;
 				end);				
-				
+			end;
+			HeavyArmor = function(player, character)
+				local remote = game.ReplicatedStorage.Master;
+				local Module = require(game.ReplicatedStorage.misc);
+				local Armors = script.Armors;
+				local HArmor = Armors["Heavy  Armor"];
+				local Humanoid = character.Humanoid;
+				local folder = player.Levels;
+				local Level = folder.HeavyArmor;
+				local CurrentExp = Level.Experience;
+				------------------End of System Stuff----------------------------
+				local cHealth = Humanoid.Health;
+				local eMod = 0.1;
+			-- Changed Event; 
+				Humanoid.Changed:connect(function(Property)
+					if (Property == "Health_XML") then -- Roblox Why you be so Annoying?
+						local bool = cHealth > Humanoid.Health;
+						local bool2 = Humanoid.Health > 0;
+						local bool3 = Module:FindObject(HArmor:GetChildren(), "Name", character);
+						if (bool) then
+							if (bool2 and bool3) then
+								local addExp = (cHealth - Humanoid.Health) * eMod;
+								remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value + addExp)}});
+							end;
+						end;
+					end;
+				end);				
 			end;
 		};
 		functions[skill](player, character);
