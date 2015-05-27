@@ -3,7 +3,7 @@ local module = {}
 		local validSkills = {"Athletics", "Acrobatics", "Swordfighting", "LightArmor", "HeavyArmor"};
 		local defaultLevel = {1, 1, 1, 1, 1};
 		local defaultExp = {0, 0, 0, 0, 0};
-		local defaultExpNeeded = {100, 100, 50, 100, 150};
+		local defaultExpNeeded = {1, 100, 50, 100, 150};
 		--[[
 			Skills Description:
 				Athletics is walking, running and swimming.
@@ -50,12 +50,14 @@ local module = {}
 					
 				-- Walking
 					character.Humanoid.Running:connect(function(speed)
+						local oldTime = tick();
 						if not(shiftKey) then
-							local oldTime = tick();
-							while (speed > 0) do wait() end;
-							local currentTime = math.floor(tick());
-							local difference = currentTime - oldTime;
-							local addExp = difference * WalkingExpGain;
+							print("Running");
+							repeat wait() until speed == 0;
+							local currentTime = tick();
+							local difference = currentTime-oldTime;
+							print(difference, currentTime, oldTime);
+							local addExp = difference;
 							remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value) + addExp}});
 						else						
 						end;
@@ -84,18 +86,19 @@ local module = {}
 				local skill = folder.Acrobatics;
 				local CurrentExp = skill.Experience;
 				local humanoid = character.Humanoid;
-				
+				local db = false;
 				humanoid.Changed:connect(function(property)
-					print(property);
-					if (property == "Jump") then
+					if (property == "Jump" and not (db)) then
+						db = true;
 						remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value) + 1}});
+						db = false;
 					end;
 				end);
 			end;
 			
 			SwordFighting = function(player, character)
 				local remote = game.ReplicatedStorage.Master;
-				local folder = script.Weapons.SwordNames;
+				local folder = player.PlayerGui.skills.Weapons.SwordNames;
 				local folder2 = player.Levels.Swordfighting;
 				local CurrentExp = folder2.Experience;
 				local Debounce = false;
@@ -126,62 +129,15 @@ local module = {}
 					end;
 				end;		
 			end;
-			
-			LightArmor = function(player, character)
-				local remote = game.ReplicatedStorage.Master;
-				local Module = require(game.ReplicatedStorage.misc);
-				local Armors = script.Armors;
-				local LArmor = Armors["Light Armor"];
-				local Humanoid = character.Humanoid;
-				local folder = player.Levels;
-				local Level = folder.LightArmor;
-				local CurrentExp = Level.Experience;
-				------------------End of System Stuff----------------------------
-				local cHealth = Humanoid.Health;
-				local eMod = 0.1;
-			-- Changed Event; 
-				Humanoid.Changed:connect(function(Property)
-					if (Property == "Health_XML") then -- Roblox Why you be so Annoying?
-						local bool = cHealth > Humanoid.Health;
-						local bool2 = Humanoid.Health > 0;
-						local bool3 = Module:FindObject(LArmor:GetChildren(), "Name", character);
-						if (bool) then
-							if (bool2 and bool3) then
-								local addExp = (cHealth - Humanoid.Health) * eMod;
-								remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value + addExp)}});
-							end;
-						end;
-					end;
-				end);				
-			end;
-			HeavyArmor = function(player, character)
-				local remote = game.ReplicatedStorage.Master;
-				local Module = require(game.ReplicatedStorage.misc);
-				local Armors = script.Armors;
-				local HArmor = Armors["Heavy  Armor"];
-				local Humanoid = character.Humanoid;
-				local folder = player.Levels;
-				local Level = folder.HeavyArmor;
-				local CurrentExp = Level.Experience;
-				------------------End of System Stuff----------------------------
-				local cHealth = Humanoid.Health;
-				local eMod = 0.1;
-			-- Changed Event; 
-				Humanoid.Changed:connect(function(Property)
-					if (Property == "Health_XML") then -- Roblox Why you be so Annoying?
-						local bool = cHealth > Humanoid.Health;
-						local bool2 = Humanoid.Health > 0;
-						local bool3 = Module:FindObject(HArmor:GetChildren(), "Name", character);
-						if (bool) then
-							if (bool2 and bool3) then
-								local addExp = (cHealth - Humanoid.Health) * eMod;
-								remote:FireServer({"change"}, {{CurrentExp, "Value", tonumber(CurrentExp.Value + addExp)}});
-							end;
-						end;
-					end;
-				end);				
-			end;
 		};
+		local skills = module:GetSkills();
+		for _, skillName in next, skills do
+			repeat wait() until player:FindFirstChild("Levels")
+			repeat wait() until player.Levels:FindFirstChild(skillName);
+			local item = player.Levels:FindFirstChild(skillName);
+			repeat wait() until item:FindFirstChild("Experience")
+			repeat wait() until item:FindFirstChild("ExperienceNeeded")
+		end;
 		functions[skill](player, character);
 	end;
 	

@@ -18,37 +18,32 @@
 		local info = {skills:GetSkills()};
 		if (CurrentSkills == nil) or (misc:MatchTable({info[1], CurrentSkills})) then
 			if (CurrentSkills == nil) then
-					CurrentSkills = info[1];
-					CurrentSLevel = info[2];
-					CurrentExp = info[3];
-					NCurrentExp = info[4];
-				else
-				-- Given that we know it is in order...
-					local difference = (#info[1] - #CurrentSkills);
-					local start = ((#info[1] - difference) + 1);
-					for i = start, #info[1] do
-						CurrentSkills[i] = info[1][i];
-						CurrentSLevel[i] = info[2][i];
-						CurrentExp[i] = info[3][i];
-						NCurrentExp[i] = info[4][i];						
-					end;
+				CurrentSkills = info[1];
+				CurrentSLevel = info[2];
+				CurrentExp = info[3];
+				NCurrentExp = info[4];
+			else
+				local start = #CurrentSkills + 1;
+				for i = start, #info[1] do
+					CurrentSkills[i] = info[1][i];
+					CurrentSLevel[i] = info[2][i];
+					CurrentExp[i] = info[3][i];
+					NCurrentExp[i] = info[4][i];
 				end;
-				DataStore:SetAsync(player.Name..": Skills", CurrentSkills);
-				DataStore:SetAsync(player.Name..": SkillsLevel", CurrentSLevel);
-				DataStore:SetAsync(player.Name..": SkillsExp", CurrentExp);
-				DataStore:SetAsync(player.Name..": SkillsNExp", NCurrentExp);			
+			end;
 		end;
 		local folder = Instance.new("Folder", player);
 		folder.Name = "Levels";
-		for number, String in next, CurrentSkills do
-				local newInstance = Instance.new("StringValue", folder);
-				local subInstance = Instance.new("StringValue", newInstance);
-				local subInstance2 = Instance.new("StringValue", newInstance);
-				newInstance.Name = String;
-				newInstance.Value = CurrentSLevel[number];
-				subInstance.Name = "Experience";
-				subInstance.Value = CurrentExp[number];
-				subInstance2.Name = "ExperienceNeeded";
-				subInstance2.Value = NCurrentExp[number];
-			end;
-		end);
+		for num, String in next, CurrentSkills do
+			local instance = Instance.new("StringValue", folder);
+			local subinstance = Instance.new("StringValue", instance);
+			local subinstance2 = Instance.new("StringValue", instance);
+			instance.Name = String;
+			subinstance.Name = "Experience";
+			subinstance2.Name = "ExperienceNeeded"	
+			
+			instance.Value = tostring(CurrentSLevel[num]);
+			subinstance.Value =  tostring(CurrentExp[num]);	
+			subinstance2.Value =  tostring(NCurrentExp[num]);
+		end;
+	end);
